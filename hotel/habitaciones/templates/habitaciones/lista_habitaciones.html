@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Habitaciones Disponibles</h2>
+
+  <form method="get" class="mb-4">
+    <label>Fecha entrada:</label>
+    <input type="date" name="fecha_entrada" value="{{ fecha_entrada }}">
+    <label>Fecha salida:</label>
+    <input type="date" name="fecha_salida" value="{{ fecha_salida }}">
+    <button type="submit">Buscar</button>
+  </form>
+
+  {% if habitaciones %}
+    <div class="grid">
+      {% for habitacion in habitaciones %}
+        <div class="card">
+          {% if habitacion.tipo.imagen %}
+            <img src="{{ habitacion.tipo.imagen.url }}" alt="{{ habitacion.tipo.nombre }}" width="300">
+          {% endif %}
+          <h3>{{ habitacion.tipo.nombre }}</h3>
+          <p>Capacidad: {{ habitacion.tipo.capacidad }} personas</p>
+          <p>Precio: ${{ habitacion.tipo.precio_por_noche }} por noche</p>
+          {% if user.is_authenticated %}
+            <a href="{% url 'crear_reserva' habitacion.id %}" class="btn btn-success">Reservar</a>
+          {% else %}
+            <p><a href="{% url 'login' %}?next={% url 'habitaciones_disponibles' %}">Inicia sesión</a> para reservar</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No hay habitaciones disponibles en las fechas seleccionadas.</p>
+  {% endif %}
+</div>
+{% endblock %}

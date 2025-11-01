@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4" style="max-width: 600px;">
+  <h2>Reservar habitación {{ habitacion.numero }}</h2>
+  <p><strong>Tipo:</strong> {{ habitacion.tipo.nombre }}</p>
+  <p><strong>Precio por noche:</strong> ${{ habitacion.tipo.precio_por_noche }}</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="fecha_entrada" class="form-label">Fecha de entrada:</label>
+      <input type="date" id="fecha_entrada" name="fecha_entrada" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label for="fecha_salida" class="form-label">Fecha de salida:</label>
+      <input type="date" id="fecha_salida" name="fecha_salida" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-success">Confirmar reserva</button>
+    <a href="{% url 'habitaciones_disponibles' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

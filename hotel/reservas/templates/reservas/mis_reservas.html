@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Mis reservas</h2>
+
+  {% if reservas %}
+    <table class="table table-striped table-bordered mt-3">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Habitación</th>
+          <th>Tipo</th>
+          <th>Fechas</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reserva in reservas %}
+        <tr>
+          <td>{{ reserva.id }}</td>
+          <td>{{ reserva.habitacion.numero }}</td>
+          <td>{{ reserva.habitacion.tipo.nombre }}</td>
+          <td>
+            {{ reserva.fecha_entrada|date:"d/m/Y" }} - {{ reserva.fecha_salida|date:"d/m/Y" }}
+          </td>
+          <td>
+            {% if reserva.estado == "pendiente" %}
+              <span class="badge bg-warning text-dark">Pendiente</span>
+            {% elif reserva.estado == "confirmada" %}
+              <span class="badge bg-success">Confirmada</span>
+            {% elif reserva.estado == "cancelada" %}
+              <span class="badge bg-secondary">Cancelada</span>
+            {% else %}
+              <span class="badge bg-info">{{ reserva.estado }}</span>
+            {% endif %}
+            {% if reserva.estado != "cancelada" %}
+            <form method="post" action="{% url 'cancelar_reserva' reserva.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger ms-2">Cancelar</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-info mt-4">
+      No tienes reservas registradas todavía.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h1>Bienvenido al Hotel XYZ</h1>
+    <p>Explorá nuestras habitaciones y servicios y reservá tu estadía fácilmente.</p>
+
+    <div class="mt-4">
+        <a href="{% url 'habitaciones_disponibles' %}" class="btn btn-primary btn-lg">Ver Habitaciones</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}" class="btn btn-secondary btn-lg">Cerrar Sesión</a>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-success btn-lg">Iniciar Sesión</a>
+            <a href="{% url 'registro' %}" class="btn btn-info btn-lg">Registrarse</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4" style="max-width: 600px;">
+  <h3>¿Cancelar la reserva #{{ reserva.id }}?</h3>
+  <p>Habitación: {{ reserva.habitacion.numero }} ({{ reserva.habitacion.tipo.nombre }})</p>
+  <p>Fechas: {{ reserva.fecha_entrada|date:"d/m/Y" }} - {{ reserva.fecha_salida|date:"d/m/Y" }}</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Confirmar cancelación</button>
+    <a href="{% url 'mis_reservas' %}" class="btn btn-secondary">Volver</a>
+  </form>
+</div>
+{% endblock %}
