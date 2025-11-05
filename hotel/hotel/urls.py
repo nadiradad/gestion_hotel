@@ -21,8 +21,7 @@ from . import views
 urlpatterns = [
     path('', views.landing, name='landing'),
     path('admin/', admin.site.urls),
-    path('habitaciones/', include('habitaciones.urls')),
-    path('usuarios/', include('usuarios.urls')),
-    path('reservas/', include('reservas.urls')),
-
+    path('habitaciones/', include('apps.habitaciones.urls')),
+    path('usuarios/', include('apps.usuarios.urls')),
+    path('reservas/', include('apps.reservas.urls')),
 ]
