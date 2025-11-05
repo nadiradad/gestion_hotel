@@ -15,6 +15,8 @@ class ReservaServicio(models.Model):
     reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE, related_name='servicios')
     servicio = models.ForeignKey(ServicioAdicional, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField(default=1)
+    fecha_reserva = models.DateTimeField(auto_now_add=True)
+    
 
     def __str__(self):
         return f"{self.servicio.nombre} x{self.cantidad} (Reserva {self.reserva.id})"
