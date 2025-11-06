@@ -1,3 +1,4 @@
+{% load static %}
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4">
@@ -16,7 +17,7 @@
       {% for habitacion in habitaciones %}
         <div class="card">
           {% if habitacion.tipo.imagen %}
-            <img src="{{ habitacion.tipo.imagen.url }}" alt="{{ habitacion.tipo.nombre }}" width="300">
+            <img src=" 'static' {{ habitacion.tipo.imagen.url }}" alt="{{ habitacion.tipo.nombre }}" width="300">
           {% endif %}
           <h3>{{ habitacion.tipo.nombre }}</h3>
           <p>Capacidad: {{ habitacion.tipo.capacidad }} personas</p>
