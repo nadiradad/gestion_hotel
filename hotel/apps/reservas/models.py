@@ -16,6 +16,7 @@ class Reserva(models.Model):
         ('finalizada', 'Finalizada'),
     ]
     estado = models.CharField(max_length=20, choices=estado_choices, default='pendiente')
+    comprobante = models.FileField(upload_to='comprobantes/', blank=True, null=True)
 
     def __str__(self):
         return f"Reserva {self.id} - {self.usuario.username} ({self.estado})"
