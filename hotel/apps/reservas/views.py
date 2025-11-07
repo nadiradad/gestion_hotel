@@ -4,6 +4,7 @@ from django.contrib import messages
 from datetime import datetime
 from apps.habitaciones.models import Habitacion
 from apps.reservas.models import Reserva
+from .forms import ComprobanteForm
 
 # Create your views here.
 @login_required
@@ -71,3 +72,16 @@ def cancelar_reserva(request, reserva_id):
     # Si entra por GET, pedimos confirmación
     return render(request, 'reservas/confirmar_cancelacion.html', {'reserva': reserva})
 
+@login_required
+def subir_comprobante(request, reserva_id):
+    reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
+
+    if request.method == 'POST':
+        form = ComprobanteForm(request.POST, request.FILES, instance=reserva)
+        if form.is_valid():
+            form.save()
+            return redirect('mis_reservas')  # o el nombre real de tu vista
+    else:
+        form = ComprobanteForm(instance=reserva)
+
+    return render(request, 'reservas/subir_comprobante.html', {'form': form, 'reserva': reserva})
