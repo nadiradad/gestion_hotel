@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center flex-column mt-5">
+    <div class="card shadow p-4 text-center" style="max-width: 500px; width: 100%;">
+        <h2 class="mb-4">Mi perfil</h2>
+
+        <ul class="list-group list-group-flush text-start">
+            <li class="list-group-item"><strong>Usuario:</strong> {{ user.username }}</li>
+            <li class="list-group-item"><strong>Nombre completo:</strong> {{ user.get_full_name }}</li>
+            <li class="list-group-item"><strong>Email:</strong> {{ user.email }}</li>
+            <li class="list-group-item"><strong>Fecha de registro:</strong> {{ user.date_joined|date:"d/m/Y" }}</li>
+        </ul>
+
+        <a href="/" class="btn btn-primary mt-4">Volver al inicio</a>
+    </div>
+</div>
+{% endblock %}

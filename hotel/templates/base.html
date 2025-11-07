@@ -17,6 +17,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'mis_reservas' %}">Mis reservas</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'perfil_usuario' %}">Mi perfil</a>
+                        </li>
                         <form method="post" action="{% url 'logout' %}" style="display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-link nav-link" style="display:inline; border:none; background:none;">

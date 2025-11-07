@@ -18,10 +18,13 @@ from django.contrib import admin
 from django.urls import path, include
 from . import views
 
+
 urlpatterns = [
     path('', views.landing, name='landing'),
     path('admin/', admin.site.urls),
     path('habitaciones/', include('apps.habitaciones.urls')),
     path('usuarios/', include('apps.usuarios.urls')),
     path('reservas/', include('apps.reservas.urls')),
+    path("perfil/", views.perfil_usuario, name="perfil_usuario"),
+    
 ]
