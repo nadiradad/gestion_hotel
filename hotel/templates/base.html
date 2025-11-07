@@ -11,11 +11,23 @@
         <div class="container">
             <a class="navbar-brand" href="/">Hotel Django</a>
             <div class="collapse navbar-collapse">
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <span class="nav-link disabled" style="cursor: default; color: white;"> Hola, {{ user.username }}
+
+                        </span>
+                    </li>
+                    {% endif %}
+                </ul>
+
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
-                        <li class="nav-item"><a class="nav-link" href="#">Hola, {{ user.username }}</a></li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'mis_reservas' %}">Mis reservas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'habitaciones_disponibles' %}">Habitaciones disponibles</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'perfil_usuario' %}">Mi perfil</a>
