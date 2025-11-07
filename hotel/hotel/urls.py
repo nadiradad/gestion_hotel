@@ -20,12 +20,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from . import views
 
+
 urlpatterns = [
     path('', views.landing, name='landing'),
     path('admin/', admin.site.urls),
     path('habitaciones/', include('apps.habitaciones.urls')),
     path('usuarios/', include('apps.usuarios.urls')),
     path('reservas/', include('apps.reservas.urls')),
+    path("perfil/", views.perfil_usuario, name="perfil_usuario"),
+    
 ]
 
 if settings.DEBUG:
