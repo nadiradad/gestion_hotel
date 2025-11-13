@@ -49,6 +49,11 @@
             {% endif %}
           </td>
         </tr>
+        <ul>
+        {% for s in reserva.servicios.all %}
+            <li>{{ s.servicio.nombre }} x{{ s.cantidad }} - ${{ s.total_precio }}</li>
+        {% endfor %}
+        </ul>
         {% endfor %}
       </tbody>
     </table>

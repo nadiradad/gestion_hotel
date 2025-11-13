@@ -15,6 +15,16 @@
       <label for="fecha_salida" class="form-label">Fecha de salida:</label>
       <input type="date" id="fecha_salida" name="fecha_salida" class="form-control" required>
     </div>
+    <h3>Servicios adicionales</h3>
+    {% for s in servicios %}
+        <div>
+            <input type="checkbox" name="servicios" value="{{ s.id }}">
+            {{ s.nombre }} - ${{ s.precio }}
+
+            <label>Cantidad:</label>
+            <input type="number" name="cantidad_{{ s.id }}" value="1" min="1">
+        </div>
+    {% endfor %}
     <button type="submit" class="btn btn-success">Confirmar reserva</button>
     <a href="{% url 'habitaciones_disponibles' %}" class="btn btn-secondary">Cancelar</a>
   </form>

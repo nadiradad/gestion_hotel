@@ -4,18 +4,19 @@ from django.contrib import messages
 from datetime import datetime
 from apps.habitaciones.models import Habitacion
 from apps.reservas.models import Reserva
+from apps.servicio_adicional.models import ServicioAdicional, ReservaServicio
 from .forms import ComprobanteForm
 
-# Create your views here.
 @login_required
 def crear_reserva(request, habitacion_id):
     habitacion = get_object_or_404(Habitacion, id=habitacion_id)
+    servicios = ServicioAdicional.objects.all()  # <<--- cargar servicios
 
     if request.method == 'POST':
         fecha_entrada = request.POST.get('fecha_entrada')
         fecha_salida = request.POST.get('fecha_salida')
 
-        # Validaciones básicas
+        # Validaciones
         if not fecha_entrada or not fecha_salida:
             messages.error(request, 'Debes seleccionar las fechas.')
             return redirect('habitaciones_disponibles')
@@ -31,7 +32,7 @@ def crear_reserva(request, habitacion_id):
             messages.error(request, 'La habitación no está disponible en esas fechas.')
             return redirect('habitaciones_disponibles')
 
-        # Crear la reserva
+        # Crear reserva
         reserva = Reserva.objects.create(
             usuario=request.user,
             habitacion=habitacion,
@@ -40,11 +41,26 @@ def crear_reserva(request, habitacion_id):
             estado='pendiente'
         )
 
+        # --- GUARDAR SERVICIOS ADICIONALES ---
+        servicios_seleccionados = request.POST.getlist('servicios')
+        for servicio_id in servicios_seleccionados:
+            cantidad = int(request.POST.get(f"cantidad_{servicio_id}", 1))
+            servicio = ServicioAdicional.objects.get(id=servicio_id)
+            ReservaServicio.objects.create(
+                reserva=reserva,
+                servicio=servicio,
+                cantidad=cantidad
+            )
+
         messages.success(request, f'Reserva creada con éxito. ID: {reserva.id}')
         return redirect('habitaciones_disponibles')
 
-    context = {'habitacion': habitacion}
+    context = {
+        'habitacion': habitacion,
+        'servicios': servicios
+    }
     return render(request, 'reservas/crear_reserva.html', context)
+
 
 @login_required
 def mis_reservas(request):
