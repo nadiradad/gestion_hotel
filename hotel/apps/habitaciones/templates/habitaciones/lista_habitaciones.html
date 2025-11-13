@@ -43,7 +43,18 @@
             {% if habitacion.descripcion %}
               <p>{{ habitacion.descripcion }}</p>
             {% endif %}
+            {% if user.is_authenticated %}
+              <a href="{% url 'crear_reserva' habitacion.id %}" class="btn btn-primary mt-3" style="font-size: 22px;">
+                  Reservar
+              </a>
+            {% else %}
+              <a href="{% url 'login' %}?next=/reservas/crear/{{ habitacion.id }}/"
+                class="btn btn-outline-secondary mt-3" style="font-size: 22px;">
+                  Inicia sesión para reservar
+              </a>
+            {% endif %}
           </div>
+          
         </div>
       </div>
     {% endfor %}
