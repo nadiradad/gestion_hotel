@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Servicios Adicionales{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-center">Servicios Adicionales</h1>
+
+    {% if servicios %}
+        <div class="row">
+            {% for servicio in servicios %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ servicio.nombre }}</h5>
+                            <p class="card-text">
+                                {{ servicio.descripcion|default:"(Sin descripción disponible)" }}
+                            </p>
+                            <p class="card-text fw-bold">
+                                Precio: ${{ servicio.precio }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning text-center">
+            No hay servicios adicionales disponibles en este momento.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
