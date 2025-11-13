@@ -1,36 +1,66 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
-<div class="container mt-4">
-  <h2>Habitaciones Disponibles</h2>
 
-  <form method="get" class="mb-4">
-    <label>Fecha entrada:</label>
-    <input type="date" name="fecha_entrada" value="{{ fecha_entrada }}">
-    <label>Fecha salida:</label>
-    <input type="date" name="fecha_salida" value="{{ fecha_salida }}">
-    <button type="submit">Buscar</button>
-  </form>
+<div class="container mt-4;">
+  <h2 class="text-center mb-4;" style="font-size: 40px">Habitaciones disponibles</h2>
+
 
   {% if habitaciones %}
-    <div class="grid">
-      {% for habitacion in habitaciones %}
-        <div class="card">
-          {% if habitacion.tipo.imagen %}
-            <img src="{{ habitacion.tipo.imagen.url }}" alt="{{ habitacion.tipo.nombre }}" width="300">
-          {% endif %}
-          <h3>{{ habitacion.tipo.nombre }}</h3>
-          <p>Capacidad: {{ habitacion.tipo.capacidad }} personas</p>
-          <p>Precio: ${{ habitacion.tipo.precio_por_noche }} por noche</p>
-          {% if user.is_authenticated %}
-            <a href="{% url 'crear_reserva' habitacion.id %}" class="btn btn-success">Reservar</a>
-          {% else %}
-            <p><a href="{% url 'login' %}?next={% url 'habitaciones_disponibles' %}">Inicia sesión</a> para reservar</p>
-          {% endif %}
+    {% for habitacion in habitaciones %}
+      <div class="card mb-4 shadow-sm p-1">
+        <div class="d-flex align-items-stretch">
+          <!-- Imagen a la izquierda -->
+          <div style="flex: 1; max-width: 45%;">
+            {% if habitacion.tipo.imagen %}
+              <img src="{{ habitacion.tipo.imagen.url }}" 
+                   alt="Imagen de {{ habitacion.tipo.nombre }}" 
+                   class="img-fluid w-100 h-100" 
+                   style="object-fit: cover; border-radius: 8px;">
+            {% else %}
+              {% if habitacion.tipo.nombre|lower == "doble" %}
+                <img src="/media/habitaciones/hab_doble.jpg" 
+                     alt="Habitación doble" 
+                     class="img-fluid w-100 h-100" 
+                     style="object-fit: cover; border-radius: 8px;">
+              {% else %}
+                <img src="/media/habitaciones/hab_indi.jpg" 
+                     alt="Habitación individual" 
+                     class="img-fluid w-100 h-100" 
+                     style="object-fit: cover; border-radius: 8px;">
+              {% endif %}
+            {% endif %}
+          </div>
+
+          <!-- Texto a la derecha -->
+          <div class="p-3 d-flex flex-column justify-content-center" style="flex: 1;font-size: 30px;">
+            <h4 class="fw-bold" style= "font-size: 30px">{{ habitacion }}</h4>
+            <p><strong>Tipo:</strong> {{ habitacion.tipo.nombre }}</p>
+            <p><strong>Precio por noche:</strong> ${{ habitacion.tipo.precio_por_noche }}</p>
+            {% if habitacion.tipo.capacidad %}
+              <p><strong>Capacidad:</strong> {{ habitacion.tipo.capacidad }} personas</p>
+            {% endif %}
+            {% if habitacion.descripcion %}
+              <p>{{ habitacion.descripcion }}</p>
+            {% endif %}
+            {% if user.is_authenticated %}
+              <a href="{% url 'crear_reserva' habitacion.id %}" class="btn btn-primary mt-3" style="font-size: 22px;">
+                  Reservar
+              </a>
+            {% else %}
+              <a href="{% url 'login' %}?next=/reservas/crear/{{ habitacion.id }}/"
+                class="btn btn-outline-secondary mt-3" style="font-size: 22px;">
+                  Inicia sesión para reservar
+              </a>
+            {% endif %}
+          </div>
+          
         </div>
-      {% endfor %}
-    </div>
+      </div>
+    {% endfor %}
   {% else %}
-    <p>No hay habitaciones disponibles en las fechas seleccionadas.</p>
+    <p class="text-center">No hay habitaciones disponibles para las fechas seleccionadas.</p>
   {% endif %}
 </div>
+
 {% endblock %}

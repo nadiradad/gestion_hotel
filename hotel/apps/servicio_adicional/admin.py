@@ -8,6 +8,6 @@ class ServicioAdicionalAdmin(admin.ModelAdmin):
 
 @admin.register(ReservaServicio)
 class ReservaServicioAdmin(admin.ModelAdmin):
-    list_display = ('reserva', 'servicio', 'cantidad', 'total_precio', 'fecha_reserva')
+    list_display = ('reserva', 'servicio', 'cantidad', 'total_precio')
     search_fields = ('reserva__usuario__username', 'servicio__nombre')
     

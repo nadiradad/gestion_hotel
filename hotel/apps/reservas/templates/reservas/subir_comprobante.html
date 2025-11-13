@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Subir comprobante para la reserva #{{ reserva.id }}</h2>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Subir comprobante</button>
+  </form>
+
+  <br>
+  <a href="{% url 'mis_reservas' %}">Volver a mis reservas</a>
+{% endblock %}

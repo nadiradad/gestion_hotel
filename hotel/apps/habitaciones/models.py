@@ -18,7 +18,7 @@ class Habitacion(models.Model):
     disponible = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"Habitación {self.numero} ({self.tipo.nombre})"
+        return f"Habitación {self.numero}"
 
     def esta_disponible(self, fecha_entrada, fecha_salida):
         """Retorna True si la habitación no tiene reservas en el rango dado."""

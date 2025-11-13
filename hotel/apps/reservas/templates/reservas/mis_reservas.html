@@ -12,6 +12,7 @@
           <th>Tipo</th>
           <th>Fechas</th>
           <th>Estado</th>
+          <th>Comprobante</th>
         </tr>
       </thead>
       <tbody>
@@ -38,6 +39,13 @@
                 {% csrf_token %}
                 <button type="submit" class="btn btn-sm btn-danger ms-2">Cancelar</button>
             </form>
+            {% endif %}
+          </td>
+          <td>
+            {% if not reserva.comprobante %}
+              <a href="{% url 'subir_comprobante' reserva.id %}" class="btn btn-sm btn-primary">Subir Comprobante</a>
+            {% else %}
+              <span class="text-success">Comprobante Subido</span>
             {% endif %}
           </td>
         </tr>
