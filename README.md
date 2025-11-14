@@ -25,14 +25,13 @@ Generar facturas y pagos al momento de check-out.
 
 Registro histórico de hospedajes para consulta.
 
-Posible interfaz web o de escritorio (dependiendo de la implementación actual).
 
 Requisitos
 Python 3.X (recomiendo la última versión estable, por ejemplo 3.11).
 
-Librerías / dependencias que el proyecto pueda requerir (revisar el archivo requirements.txt si existe).
+Librerías / dependencias que el proyecto pueda requerir (revisar el archivo requirements.txt).
 
-Base de datos o archivo de persistencia (dependiendo de la implementación: SQLite, archivos JSON, etc.).
+Base de datos o archivo de persistencia (SQLite).
 
 Sistema operativo: Windows / macOS / Linux (compatible con Python).
 
