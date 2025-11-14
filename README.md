@@ -1,3 +1,5 @@
+<img width=100% src="https://capsule-render.vercel.app/api?type=waving&color=68c3b7&height=120&section=header"/>
+
 Gestión Hotel
 Sistema de gestión para un hotel realizado en Python.
 
