@@ -79,3 +79,5 @@ gestion_hotel/
 ├── requirements.txt  
 └── otros archivos de configuración
 Dentro de hotel/ probablemente encontrarás módulos para clientes, habitaciones, reservas y pagos (esto es una suposición que puedes adaptar).
+
+<img width=100% src="https://capsule-render.vercel.app/api?type=waving&color=68c3b7&height=120&section=footer"/>
