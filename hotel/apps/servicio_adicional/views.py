@@ -1,10 +1,12 @@
 # apps/servicio_adicional/views.py
-from django.shortcuts import render
+from django.views.generic import ListView
 from .models import ServicioAdicional
 
-def lista_servicios(request):
-    servicios = ServicioAdicional.objects.all()
-    return render(request, 'servicio_adicional/servicios_adicionales.html', {'servicios': servicios})
+class ListaServiciosView(ListView):
+    model = ServicioAdicional
+    template_name = 'servicio_adicional/servicios_adicionales.html'
+    context_object_name = 'servicios'
+
 
 
 
