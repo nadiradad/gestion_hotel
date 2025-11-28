@@ -1,17 +1,19 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import RegistroForm  # <- Importar tu formulario personalizado
+from django.views.generic import CreateView
+from django.urls import reverse_lazy
+from .forms import RegistroForm
 
-def registro(request):
-    if request.method == 'POST':
-        form = RegistroForm(request.POST)  # <- Usar RegistroForm, NO UserCreationForm
-        if form.is_valid():
-            user = form.save()
-            messages.success(request, 'Cuenta creada correctamente. Inicia sesión.')
-            return redirect('login')
-        else:
-            messages.error(request, 'Por favor corrige los errores en el formulario.')
-    else:
-        form = RegistroForm()
+class RegistroView(CreateView):
+    form_class = RegistroForm
+    template_name = 'usuarios/registro.html'
+    success_url = reverse_lazy('login')
 
-    return render(request, 'usuarios/registro.html', {'form': form})
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, 'Cuenta creada correctamente. Inicia sesión.')
+        return response
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Por favor corrige los errores en el formulario.')
+        return super().form_invalid(form)
