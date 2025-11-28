@@ -20,13 +20,17 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .views import LandingView
 
+
 urlpatterns = [
     path('', LandingView.as_view(), name='landing'),
     path('admin/', admin.site.urls),
     path('habitaciones/', include('apps.habitaciones.urls')),
     path('usuarios/', include('apps.usuarios.urls')),
     path('reservas/', include('apps.reservas.urls')),
-]
+    path('servicios/', include('apps.servicio_adicional.urls')),
+
+    path("perfil/", views.perfil_usuario, name="perfil_usuario"),
+    ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

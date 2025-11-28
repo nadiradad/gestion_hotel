@@ -11,6 +11,7 @@
           <th>Habitación</th>
           <th>Tipo</th>
           <th>Fechas</th>
+          <th>Servicios adicionales</th>
           <th>Estado</th>
           <th>Comprobante</th>
         </tr>
@@ -23,6 +24,17 @@
           <td>{{ reserva.habitacion.tipo.nombre }}</td>
           <td>
             {{ reserva.fecha_entrada|date:"d/m/Y" }} - {{ reserva.fecha_salida|date:"d/m/Y" }}
+          </td>
+          <td>
+            {% if reserva.servicios.count > 0 %}
+              <ul>
+              {% for rs in reserva.servicios.all %}
+                <li>{{ rs.servicio.nombre }} x{{ rs.cantidad }} - ${{ rs.total_precio }}</li>
+              {% endfor %}
+              </ul>
+            {% else %}
+              No hay servicios adicionales
+            {% endif %}
           </td>
           <td>
             {% if reserva.estado == "pendiente" %}
