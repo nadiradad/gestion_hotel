@@ -1,22 +1,39 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.generic import ListView, UpdateView
 from django.contrib import messages
+from django.urls import reverse_lazy
 from datetime import datetime
+
 from apps.habitaciones.models import Habitacion
 from apps.reservas.models import Reserva
 from apps.servicio_adicional.models import ServicioAdicional, ReservaServicio
 from .forms import ComprobanteForm
 
-@login_required
-def crear_reserva(request, habitacion_id):
-    habitacion = get_object_or_404(Habitacion, id=habitacion_id)
-    servicios = ServicioAdicional.objects.all()  # <<--- cargar servicios
 
-    if request.method == 'POST':
+# ------------------------------------------------------------
+# CREAR RESERVA – Class Based View
+# ------------------------------------------------------------
+@method_decorator(login_required, name='dispatch')
+class CrearReservaView(View):
+
+    def get(self, request, habitacion_id):
+        habitacion = get_object_or_404(Habitacion, id=habitacion_id)
+        servicios = ServicioAdicional.objects.all()
+
+        return render(request, 'reservas/crear_reserva.html', {
+            'habitacion': habitacion,
+            'servicios': servicios
+        })
+
+    def post(self, request, habitacion_id):
+        habitacion = get_object_or_404(Habitacion, id=habitacion_id)
+
         fecha_entrada = request.POST.get('fecha_entrada')
         fecha_salida = request.POST.get('fecha_salida')
 
-        # Validaciones
         if not fecha_entrada or not fecha_salida:
             messages.error(request, 'Debes seleccionar las fechas.')
             return redirect('habitaciones_disponibles')
@@ -32,7 +49,6 @@ def crear_reserva(request, habitacion_id):
             messages.error(request, 'La habitación no está disponible en esas fechas.')
             return redirect('habitaciones_disponibles')
 
-        # Crear reserva
         reserva = Reserva.objects.create(
             usuario=request.user,
             habitacion=habitacion,
@@ -41,7 +57,6 @@ def crear_reserva(request, habitacion_id):
             estado='pendiente'
         )
 
-        # --- GUARDAR SERVICIOS ADICIONALES ---
         servicios_seleccionados = request.POST.getlist('servicios')
         for servicio_id in servicios_seleccionados:
             cantidad = int(request.POST.get(f"cantidad_{servicio_id}", 1))
@@ -55,49 +70,63 @@ def crear_reserva(request, habitacion_id):
         messages.success(request, f'Reserva creada con éxito. ID: {reserva.id}')
         return redirect('habitaciones_disponibles')
 
-    context = {
-        'habitacion': habitacion,
-        'servicios': servicios
-    }
-    return render(request, 'reservas/crear_reserva.html', context)
+
+# ------------------------------------------------------------
+# MIS RESERVAS – Class Based View
+# ------------------------------------------------------------
+@method_decorator(login_required, name='dispatch')
+class MisReservasView(ListView):
+    model = Reserva
+    template_name = 'reservas/mis_reservas.html'
+    context_object_name = 'reservas'
+
+    def get_queryset(self):
+        return (
+            self.request.user.reservas
+            .select_related('habitacion', 'habitacion__tipo')
+            .order_by('-fecha_entrada')
+        )
 
 
-@login_required
-def mis_reservas(request):
-    reservas = (
-        request.user.reservas
-        .select_related('habitacion', 'habitacion__tipo')
-        .order_by('-fecha_entrada')
-    )
-    return render(request, 'reservas/mis_reservas.html', {'reservas': reservas})
+# ------------------------------------------------------------
+# CANCELAR RESERVA – Class Based View
+# ------------------------------------------------------------
+@method_decorator(login_required, name='dispatch')
+class CancelarReservaView(View):
 
-@login_required
-def cancelar_reserva(request, reserva_id):
-    reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
+    def get(self, request, reserva_id):
+        reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
 
-    if reserva.estado == 'cancelada':
-        messages.warning(request, 'Esta reserva ya está cancelada.')
-        return redirect('mis_reservas')
+        if reserva.estado == 'cancelada':
+            messages.warning(request, 'Esta reserva ya está cancelada.')
+            return redirect('mis_reservas')
 
-    if request.method == 'POST':
-        reserva.estado = 'cancelada'
-        reserva.save()
+        return render(request, 'reservas/confirmar_cancelacion.html', {
+            'reserva': reserva
+        })
+
+    def post(self, request, reserva_id):
+        reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
+
+        if reserva.estado != 'cancelada':
+            reserva.estado = 'cancelada'
+            reserva.save()
+
         messages.success(request, f'Reserva #{reserva.id} cancelada correctamente.')
         return redirect('mis_reservas')
 
-    # Si entra por GET, pedimos confirmación
-    return render(request, 'reservas/confirmar_cancelacion.html', {'reserva': reserva})
 
-@login_required
-def subir_comprobante(request, reserva_id):
-    reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
+# ------------------------------------------------------------
+# SUBIR COMPROBANTE – Class Based View (UpdateView)
+# ------------------------------------------------------------
+@method_decorator(login_required, name='dispatch')
+class SubirComprobanteView(UpdateView):
+    model = Reserva
+    form_class = ComprobanteForm
+    template_name = 'reservas/subir_comprobante.html'
 
-    if request.method == 'POST':
-        form = ComprobanteForm(request.POST, request.FILES, instance=reserva)
-        if form.is_valid():
-            form.save()
-            return redirect('mis_reservas')  # o el nombre real de tu vista
-    else:
-        form = ComprobanteForm(instance=reserva)
+    def get_success_url(self):
+        return reverse_lazy('mis_reservas')
 
-    return render(request, 'reservas/subir_comprobante.html', {'form': form, 'reserva': reserva})
+    def get_queryset(self):
+        return Reserva.objects.filter(usuario=self.request.user)
