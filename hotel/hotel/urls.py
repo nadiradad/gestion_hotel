@@ -18,7 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+<<<<<<< HEAD
 from .views import LandingView, perfil_usuario
+=======
+from .views import LandingView
+>>>>>>> b1da7d5f11864ef974bcfa7cf4b896b2711086f2
 
 
 urlpatterns = [
