@@ -1,8 +1,18 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.views.generic import CreateView
+from django.contrib.auth import logout
+from django.views.generic import CreateView, View
 from django.urls import reverse_lazy
 from .forms import RegistroForm
+
+class LogoutView(View):
+    def get(self, request, *args, **kwargs):
+        logout(request)
+        return redirect('landing')
+    
+    def post(self, request, *args, **kwargs):
+        logout(request)
+        return redirect('landing')
 
 class RegistroView(CreateView):
     form_class = RegistroForm
