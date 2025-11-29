@@ -9,6 +9,10 @@ class LogoutView(View):
     def get(self, request, *args, **kwargs):
         logout(request)
         return redirect('landing')
+    
+    def post(self, request, *args, **kwargs):
+        logout(request)
+        return redirect('landing')
 
 class RegistroView(CreateView):
     form_class = RegistroForm
