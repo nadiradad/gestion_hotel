@@ -1,10 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from django.views import View
-from django.views.generic import ListView, UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
+from django.views.generic import CreateView, ListView, UpdateView, View
 from datetime import datetime
 
 from apps.habitaciones.models import Habitacion
@@ -13,53 +11,55 @@ from apps.servicio_adicional.models import ServicioAdicional, ReservaServicio
 from .forms import ComprobanteForm
 
 
-# ------------------------------------------------------------
-# CREAR RESERVA – Class Based View
-# ------------------------------------------------------------
-@method_decorator(login_required, name='dispatch')
-class CrearReservaView(View):
+class CrearReservaView(LoginRequiredMixin, CreateView):
+    model = Reserva
+    fields = []  # No form fields needed as we get data from POST
+    template_name = 'reservas/crear_reserva.html'
 
-    def get(self, request, habitacion_id):
-        habitacion = get_object_or_404(Habitacion, id=habitacion_id)
-        servicios = ServicioAdicional.objects.all()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['habitacion'] = get_object_or_404(Habitacion, id=self.kwargs['habitacion_id'])
+        context['servicios'] = ServicioAdicional.objects.all()
+        return context
 
-        return render(request, 'reservas/crear_reserva.html', {
-            'habitacion': habitacion,
-            'servicios': servicios
-        })
-
-    def post(self, request, habitacion_id):
-        habitacion = get_object_or_404(Habitacion, id=habitacion_id)
-
-        fecha_entrada = request.POST.get('fecha_entrada')
-        fecha_salida = request.POST.get('fecha_salida')
+    def form_valid(self, form):
+        habitacion = get_object_or_404(Habitacion, id=self.kwargs['habitacion_id'])
+        fecha_entrada = self.request.POST.get('fecha_entrada')
+        fecha_salida = self.request.POST.get('fecha_salida')
 
         if not fecha_entrada or not fecha_salida:
-            messages.error(request, 'Debes seleccionar las fechas.')
+            messages.error(self.request, 'Debes seleccionar las fechas.')
             return redirect('habitaciones_disponibles')
 
-        fecha_entrada = datetime.strptime(fecha_entrada, "%Y-%m-%d").date()
-        fecha_salida = datetime.strptime(fecha_salida, "%Y-%m-%d").date()
+        try:
+            fecha_entrada = datetime.strptime(fecha_entrada, "%Y-%m-%d").date()
+            fecha_salida = datetime.strptime(fecha_salida, "%Y-%m-%d").date()
+        except ValueError:
+            messages.error(self.request, 'Formato de fecha inválido.')
+            return redirect('habitaciones_disponibles')
 
         if fecha_entrada >= fecha_salida:
-            messages.error(request, 'La fecha de salida debe ser posterior a la de entrada.')
+            messages.error(self.request, 'La fecha de salida debe ser posterior a la de entrada.')
             return redirect('habitaciones_disponibles')
 
         if not habitacion.esta_disponible(fecha_entrada, fecha_salida):
-            messages.error(request, 'La habitación no está disponible en esas fechas.')
+            messages.error(self.request, 'La habitación no está disponible en esas fechas.')
             return redirect('habitaciones_disponibles')
 
-        reserva = Reserva.objects.create(
-            usuario=request.user,
-            habitacion=habitacion,
-            fecha_entrada=fecha_entrada,
-            fecha_salida=fecha_salida,
-            estado='pendiente'
-        )
+        reserva = form.save(commit=False)
+        reserva.usuario = self.request.user
+        reserva.habitacion = habitacion
+        reserva.fecha_entrada = fecha_entrada
+        reserva.fecha_salida = fecha_salida
+        reserva.estado = 'pendiente'
+        reserva.save()
 
-        servicios_seleccionados = request.POST.getlist('servicios')
+        servicios_seleccionados = self.request.POST.getlist('servicios')
         for servicio_id in servicios_seleccionados:
-            cantidad = int(request.POST.get(f"cantidad_{servicio_id}", 1))
+            try:
+                cantidad = int(self.request.POST.get(f"cantidad_{servicio_id}", 1))
+            except ValueError:
+                cantidad = 1
             servicio = ServicioAdicional.objects.get(id=servicio_id)
             ReservaServicio.objects.create(
                 reserva=reserva,
@@ -67,15 +67,11 @@ class CrearReservaView(View):
                 cantidad=cantidad
             )
 
-        messages.success(request, f'Reserva creada con éxito. ID: {reserva.id}')
+        messages.success(self.request, f'Reserva creada con éxito. ID: {reserva.id}')
         return redirect('habitaciones_disponibles')
 
 
-# ------------------------------------------------------------
-# MIS RESERVAS – Class Based View
-# ------------------------------------------------------------
-@method_decorator(login_required, name='dispatch')
-class MisReservasView(ListView):
+class MisReservasView(LoginRequiredMixin, ListView):
     model = Reserva
     template_name = 'reservas/mis_reservas.html'
     context_object_name = 'reservas'
@@ -88,45 +84,36 @@ class MisReservasView(ListView):
         )
 
 
-# ------------------------------------------------------------
-# CANCELAR RESERVA – Class Based View
-# ------------------------------------------------------------
-@method_decorator(login_required, name='dispatch')
-class CancelarReservaView(View):
-
-    def get(self, request, reserva_id):
-        reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
-
+class CancelarReservaView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        reserva = get_object_or_404(Reserva, id=self.kwargs['reserva_id'], usuario=request.user)
         if reserva.estado == 'cancelada':
             messages.warning(request, 'Esta reserva ya está cancelada.')
             return redirect('mis_reservas')
+        return render(request, 'reservas/confirmar_cancelacion.html', {'reserva': reserva})
 
-        return render(request, 'reservas/confirmar_cancelacion.html', {
-            'reserva': reserva
-        })
-
-    def post(self, request, reserva_id):
-        reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
-
+    def post(self, request, *args, **kwargs):
+        reserva = get_object_or_404(Reserva, id=self.kwargs['reserva_id'], usuario=request.user)
         if reserva.estado != 'cancelada':
             reserva.estado = 'cancelada'
             reserva.save()
-
-        messages.success(request, f'Reserva #{reserva.id} cancelada correctamente.')
+            messages.success(request, f'Reserva #{reserva.id} cancelada correctamente.')
+        else:
+            messages.warning(request, 'Esta reserva ya está cancelada.')
         return redirect('mis_reservas')
 
 
-# ------------------------------------------------------------
-# SUBIR COMPROBANTE – Class Based View (UpdateView)
-# ------------------------------------------------------------
-@method_decorator(login_required, name='dispatch')
-class SubirComprobanteView(UpdateView):
+class SubirComprobanteView(LoginRequiredMixin, UpdateView):
     model = Reserva
     form_class = ComprobanteForm
     template_name = 'reservas/subir_comprobante.html'
-
-    def get_success_url(self):
-        return reverse_lazy('mis_reservas')
+    pk_url_kwarg = 'reserva_id'
+    success_url = reverse_lazy('mis_reservas')
 
     def get_queryset(self):
-        return Reserva.objects.filter(usuario=self.request.user)
+        return super().get_queryset().filter(usuario=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['reserva'] = self.get_object()
+        return context

@@ -1,25 +1,27 @@
-from django.shortcuts import render
+from django.views.generic import ListView
 from datetime import date
-from apps.habitaciones.models import Habitacion, TipoHabitacion
+from .models import Habitacion
 
-# Create your views here.
-def habitaciones_disponibles(request):
-    fecha_entrada = request.GET.get('fecha_entrada')
-    fecha_salida = request.GET.get('fecha_salida')
+class HabitacionesDisponiblesView(ListView):
+    model = Habitacion
+    template_name = 'habitaciones/lista_habitaciones.html'
+    context_object_name = 'habitaciones'
 
-    habitaciones = Habitacion.objects.filter(disponible=True).select_related('tipo')
+    def get_queryset(self):
+        queryset = super().get_queryset().filter(disponible=True).select_related('tipo')
+        fecha_entrada = self.request.GET.get('fecha_entrada')
+        fecha_salida = self.request.GET.get('fecha_salida')
 
-    if fecha_entrada and fecha_salida:
-        # Filtramos solo las habitaciones disponibles en ese rango
-        disponibles = []
-        for habitacion in habitaciones:
-            if habitacion.esta_disponible(fecha_entrada, fecha_salida):
-                disponibles.append(habitacion)
-        habitaciones = disponibles
+        if fecha_entrada and fecha_salida:
+            disponibles = []
+            for habitacion in queryset:
+                if habitacion.esta_disponible(fecha_entrada, fecha_salida):
+                    disponibles.append(habitacion)
+            return disponibles
+        return queryset
 
-    context = {
-        'habitaciones': habitaciones,
-        'fecha_entrada': fecha_entrada,
-        'fecha_salida': fecha_salida,
-    }
-    return render(request, 'habitaciones/lista_habitaciones.html', context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['fecha_entrada'] = self.request.GET.get('fecha_entrada')
+        context['fecha_salida'] = self.request.GET.get('fecha_salida')
+        return context

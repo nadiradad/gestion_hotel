@@ -18,18 +18,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from . import views
+from .views import LandingView, perfil_usuario
 
 
 urlpatterns = [
-    path('', views.landing, name='landing'),
+    path('', LandingView.as_view(), name='landing'),
     path('admin/', admin.site.urls),
     path('habitaciones/', include('apps.habitaciones.urls')),
     path('usuarios/', include('apps.usuarios.urls')),
     path('reservas/', include('apps.reservas.urls')),
     path('servicios/', include('apps.servicio_adicional.urls')),
 
-    path("perfil/", views.perfil_usuario, name="perfil_usuario"),
+    path("perfil/", perfil_usuario, name="perfil_usuario"),
     ]
 
 if settings.DEBUG:
