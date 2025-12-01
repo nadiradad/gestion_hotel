@@ -1,9 +1,8 @@
-# apps/servicio_adicional/urls.py
 from django.urls import path
-from . import views
+from .views import ListaServiciosView
 
 urlpatterns = [
-    path('', views.lista_servicios, name='servicios_adicionales'),
+    path('', ListaServiciosView.as_view(), name='servicios_adicionales'),
 ]
 
 
